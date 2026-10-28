@@ -176,6 +176,7 @@
       let drawOrder = [];
       let autoTimer = null;
       let ticketNumbers = [];
+      let ticketGrid = [];
       let marked = new Set();
 
       const grid = $("numberGrid");
@@ -238,61 +239,120 @@
       }
 
       function generateTicket() {
-        // Build a standard-style 3 x 9 ticket with 15 numbers and 5 numbers per row.
-        const cols = Array.from({ length: 9 }, (_, c) => {
-          const start = c === 0 ? 1 : c * 10;
-          const end = c === 8 ? 90 : c * 10 + 9;
-          return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-        });
-        const chosen = cols.map(col => {
-          const copy = [...col].sort(() => Math.random() - 0.5);
-          return copy.slice(0, 3).sort((a, b) => a - b);
-        });
-        const rows = Array.from({ length: 3 }, () => Array(9).fill(null));
-        const rowCounts = [0, 0, 0];
-        // Each column has 1–3 numbers; distribute each column's numbers while keeping 5 per row.
-        for (let c = 0; c < 9; c++) {
-          const nums = chosen[c];
-          const rowOptions = [0, 1, 2].sort(() => Math.random() - 0.5);
-          nums.forEach((num, idx) => {
-            const possible = rowOptions.filter(r => rowCounts[r] < 5);
-            const row = possible.length ? possible[0] : [0,1,2].find(r => rowCounts[r] < 5);
-            rows[row][c] = num;
-            rowCounts[row]++;
-          });
-        }
-        // If the random distribution did not produce exactly 5 per row, rebuild with a valid 5/row layout.
-        if (rowCounts.some(x => x !== 5)) {
-          rows.forEach(r => r.fill(null));
-          const rowCounts2 = [0, 0, 0];
-          for (let c = 0; c < 9; c++) {
-            const nums = chosen[c];
-            const rowOrder = [0,1,2].sort(() => Math.random() - 0.5);
-            nums.forEach(num => {
-              let row = rowOrder.find(r => rowCounts2[r] < 5 && rows[r][c] === null);
-              if (row === undefined) row = [0,1,2].find(r => rowCounts2[r] < 5 && rows[r][c] === null);
-              if (row !== undefined) { rows[row][c] = num; rowCounts2[row]++; }
-            });
+        // Create a valid 3 x 9 Tambola ticket: 15 numbers, exactly 5 per row,
+        // and 1–3 numbers in every column.
+        const columnCounts = Array(9).fill(1);
+        let extras = 6; // 9 columns get one number each; add six more.
+        while (extras > 0) {
+          const c = Math.floor(Math.random() * 9);
+          if (columnCounts[c] < 3) {
+            columnCounts[c]++;
+            extras--;
           }
         }
+
+        const rows = Array.from({ length: 3 }, () => Array(9).fill(null));
+        const rowCounts = [0, 0, 0];
+
+        // Backtrack to assign each column's numbers to distinct rows while
+        // keeping exactly five numbers in each row.
+        function assignColumn(c) {
+          if (c === 9) return rowCounts.every(count => count === 5);
+
+          const k = columnCounts[c];
+          const rowChoices = [0, 1, 2];
+          // Shuffle row order for varied tickets.
+          for (let i = rowChoices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [rowChoices[i], rowChoices[j]] = [rowChoices[j], rowChoices[i]];
+          }
+
+          function chooseRows(start, selected) {
+            if (selected.length === k) {
+              if (selected.some(r => rowCounts[r] >= 5)) return false;
+              selected.forEach(r => {
+                rows[r][c] = true;
+                rowCounts[r]++;
+              });
+              if (assignColumn(c + 1)) return true;
+              selected.forEach(r => {
+                rows[r][c] = null;
+                rowCounts[r]--;
+              });
+              return false;
+            }
+            for (let i = start; i < rowChoices.length; i++) {
+              const r = rowChoices[i];
+              if (rowCounts[r] < 5 && chooseRows(i + 1, [...selected, r])) return true;
+            }
+            return false;
+          }
+          return chooseRows(0, []);
+        }
+
+        // A valid arrangement is guaranteed to exist; retry with a fresh
+        // column distribution if a random ordering reaches a dead end.
+        let attempts = 0;
+        while (!assignColumn(0)) {
+          attempts++;
+          rows.forEach(row => row.fill(null));
+          rowCounts.fill(0);
+          if (attempts > 100) {
+            // Deterministic valid fallback: 5 numbers in each row, with
+            // each column used at least once and no more than three times.
+            rows.forEach(row => row.fill(null));
+            rowCounts.fill(0);
+            const fallback = [
+              [0, 1, 2, 3, 4],
+              [2, 3, 4, 5, 6],
+              [4, 5, 6, 7, 8]
+            ];
+            fallback.forEach((cols, r) => cols.forEach(c => {
+              if (rows[r][c] === null) {
+                rows[r][c] = true;
+                rowCounts[r]++;
+              }
+            }));
+            break;
+          }
+        }
+
+        // Select and sort numbers from each column's numeric range.
+        for (let c = 0; c < 9; c++) {
+          const start = c === 0 ? 1 : c * 10;
+          const end = c === 8 ? 90 : c * 10 + 9;
+          const candidates = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+          for (let i = candidates.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+          }
+          const count = rows.reduce((sum, row) => sum + (row[c] === true ? 1 : 0), 0);
+          const values = candidates.slice(0, count).sort((a, b) => a - b);
+          let idx = 0;
+          for (let r = 0; r < 3; r++) {
+            if (rows[r][c] === true) rows[r][c] = values[idx++];
+          }
+        }
+
+        ticketGrid = rows;
         ticketNumbers = rows.flat().filter(n => n !== null);
         marked = new Set();
         renderTicket();
-        $("ticketStatus").textContent = `Ticket generated: ${ticketNumbers.length} numbers. Tap a cell to mark it.`;
+        $("ticketStatus").textContent = `Ticket generated: ${ticketNumbers.length} numbers. Tap a number to mark it.`;
       }
 
       function renderTicket() {
         const holder = $("ticket");
         holder.replaceChildren();
-        if (!ticketNumbers.length) return;
-        const rows = Array.from({ length: 3 }, (_, r) => ticketNumbers.slice(r * 9, r * 9 + 9));
-        rows.forEach(row => row.forEach(n => {
+        if (!ticketGrid.length) return;
+        ticketGrid.forEach(row => row.forEach(n => {
           const cell = document.createElement("button");
           cell.type = "button";
           cell.className = "ticket-cell" + (n === null || n === undefined ? " blank" : "");
           if (n === null || n === undefined) {
             cell.disabled = true;
             cell.textContent = "";
+            cell.setAttribute("aria-hidden", "true");
           } else {
             cell.textContent = n;
             if (marked.has(n)) cell.classList.add("marked");
