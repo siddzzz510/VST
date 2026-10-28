@@ -1,406 +1,229 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#123b2a" />
-  <title>Tambola Portal</title>
-  <style>
-    :root {
-      --green: #123b2a;
-      --green2: #1e6848;
-      --gold: #f2c14e;
-      --cream: #fffaf0;
-      --ink: #183027;
-      --muted: #607168;
-      --line: #d9e3dc;
-      --red: #b93636;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color: var(--ink); background: linear-gradient(135deg, #edf5ef, #fffaf0);
-      min-height: 100vh;
-    }
-    header {
-      background: var(--green); color: white; padding: 22px 16px; text-align: center;
-      border-bottom: 5px solid var(--gold);
-    }
-    header h1 { margin: 0; font-size: clamp(1.7rem, 4vw, 2.5rem); letter-spacing: .03em; }
-    header p { margin: 7px 0 0; color: #e3eee7; }
-    main { max-width: 1100px; margin: 24px auto; padding: 0 16px 32px; }
-    .layout { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, .85fr); gap: 18px; }
-    .panel {
-      background: white; border: 1px solid var(--line); border-radius: 18px; padding: 18px;
-      box-shadow: 0 8px 24px rgba(18,59,42,.07); min-width: 0;
-    }
-    .panel h2 { margin: 0 0 14px; font-size: 1.2rem; }
-    .current-wrap { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
-    .current {
-      width: 112px; height: 112px; border-radius: 50%; display: grid; place-items: center;
-      background: var(--green); color: white; border: 5px solid var(--gold);
-      font-size: 2.6rem; font-weight: 800; flex-shrink: 0;
-    }
-    .current.empty { background: #eef3ef; color: #839188; border-color: #dce6de; }
-    .current-label { color: var(--muted); font-size: .9rem; }
-    .status { font-weight: 700; margin-top: 5px; }
-    .controls { display: flex; flex-wrap: wrap; gap: 9px; }
-    button {
-      border: 0; border-radius: 10px; padding: 11px 15px; cursor: pointer; font: inherit;
-      font-weight: 700; transition: transform .08s, opacity .15s;
-    }
-    button:active { transform: translateY(1px); }
-    button:disabled { opacity: .45; cursor: not-allowed; }
-    .primary { background: var(--green2); color: white; }
-    .gold { background: var(--gold); color: #33280c; }
-    .light { background: #edf3ef; color: var(--green); border: 1px solid var(--line); }
-    .danger { background: #fff0f0; color: var(--red); border: 1px solid #f0caca; }
-    .number-grid { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 5px; }
-    .num {
-      display: grid; place-items: center; min-height: 34px; padding: 4px 0;
-      border-radius: 7px; border: 1px solid var(--line); background: #f7faf7;
-      color: #52635a; font-weight: 650; font-size: .9rem;
-    }
-    .num.called { background: var(--green2); color: white; border-color: var(--green2); }
-    .num.latest { background: var(--gold); color: #33280c; border-color: #d9a82e; box-shadow: 0 0 0 2px #f9e5a7; }
-    .history { display: flex; flex-wrap: wrap; gap: 7px; min-height: 35px; }
-    .chip { padding: 7px 10px; border-radius: 999px; background: #edf3ef; font-weight: 750; }
-    .chip:first-child { background: var(--gold); }
-    .field { display: grid; gap: 6px; margin: 12px 0; }
-    input, select {
-      width: 100%; border: 1px solid #cbd8ce; border-radius: 9px; padding: 10px 11px;
-      font: inherit; background: white; color: var(--ink);
-    }
-    .ticket { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 4px; margin-top: 12px; }
-    .ticket-cell {
-      min-height: 36px; display: grid; place-items: center; border-radius: 6px;
-      background: #f1f5f1; border: 1px solid #e0e8e1; font-weight: 700; font-size: .9rem;
-    }
-    .ticket-cell.blank { background: #fbfcfb; }
-    .ticket-cell.marked { background: var(--gold); border-color: #d9a82e; color: #33280c; }
-    .ticket-cell.hit { background: var(--green2); border-color: var(--green2); color: white; }
-    .muted { color: var(--muted); font-size: .9rem; line-height: 1.45; }
-    .section-gap { margin-top: 18px; }
-    .small-heading { display:flex; justify-content:space-between; align-items:center; gap:8px; }
-    footer { text-align: center; padding: 0 16px 24px; color: var(--muted); font-size: .85rem; }
-    @media (max-width: 760px) {
-      .layout { grid-template-columns: 1fr; }
-      .number-grid { grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px; }
-      .num { min-height: 31px; font-size: .8rem; }
-      .panel { padding: 14px; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tambola Portal</title>
+<style>
+:root{--green:#123b2a;--green2:#1e6848;--gold:#f2c14e;--cream:#fffaf0;--ink:#183027;--muted:#607168;--line:#d9e3dc;--red:#b93636}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink);background:linear-gradient(135deg,#edf5ef,#fffaf0);min-height:100vh}
+header{background:var(--green);color:#fff;padding:22px 16px;text-align:center;border-bottom:5px solid var(--gold)}header h1{margin:0;font-size:clamp(1.7rem,4vw,2.5rem)}header p{margin:7px 0 0;color:#e3eee7}
+main{max-width:1100px;margin:24px auto;padding:0 16px 32px}.layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.85fr);gap:18px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 8px 24px #123b2a12;min-width:0}.panel h2{margin:0 0 14px;font-size:1.2rem}
+.current-wrap{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:16px}.current{width:112px;height:112px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#fff;border:5px solid var(--gold);font-size:2.6rem;font-weight:800;flex-shrink:0}.current.empty{background:#eef3ef;color:#839188;border-color:#dce6de}
+.current-label,.muted{color:var(--muted)}.current-label{font-size:.9rem}.status{font-weight:700;margin-top:5px}.controls{display:flex;flex-wrap:wrap;gap:9px}
+button{border:0;border-radius:10px;padding:11px 15px;cursor:pointer;font:inherit;font-weight:700}button:disabled{opacity:.45;cursor:not-allowed}.primary{background:var(--green2);color:#fff}.gold{background:var(--gold);color:#33280c}.light{background:#edf3ef;color:var(--green);border:1px solid var(--line)}.danger{background:#fff0f0;color:var(--red);border:1px solid #f0caca}
+.number-grid{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px}.num{display:grid;place-items:center;min-height:34px;padding:4px 0;border-radius:7px;border:1px solid var(--line);background:#f7faf7;color:#52635a;font-weight:650;font-size:.9rem}.num.called{background:var(--green2);color:#fff;border-color:var(--green2)}.num.latest{background:var(--gold);color:#33280c;border-color:#d9a82e}
+.history{display:flex;flex-wrap:wrap;gap:7px;min-height:35px}.chip{padding:7px 10px;border-radius:999px;background:#edf3ef;font-weight:750}.chip:first-child{background:var(--gold)}.field{display:grid;gap:6px;margin:12px 0}select{width:100%;border:1px solid #cbd8ce;border-radius:9px;padding:10px;font:inherit;background:#fff;color:var(--ink)}
+.ticket{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:4px;margin-top:12px}.ticket-cell{min-width:0;min-height:38px;padding:4px 0;display:grid;place-items:center;border-radius:6px;background:#f1f5f1;border:1px solid #e0e8e1;font-weight:700;font-size:.9rem;color:var(--ink)}.ticket-cell.blank{background:#fbfcfb;border-color:#f0f3f0}.ticket-cell.marked{background:var(--gold);border-color:#d9a82e;color:#33280c}.ticket-cell.hit{background:var(--green2);border-color:var(--green2);color:#fff}
+.muted{font-size:.9rem;line-height:1.45}.section-gap{margin-top:18px}.small-heading{display:flex;justify-content:space-between;align-items:center;gap:8px}footer{text-align:center;padding:0 16px 24px;color:var(--muted);font-size:.85rem}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.number-grid{gap:4px}.num{min-height:31px;font-size:.8rem}.panel{padding:14px}.ticket-cell{min-height:34px;font-size:.8rem}}
+</style>
 </head>
 <body>
-  <header>
-    <h1>🎉 Tambola Portal</h1>
-    <p>House • Line • Full House — let the game begin!</p>
-  </header>
+<header><h1>🎉 Tambola Portal</h1><p>House • Line • Full House — let the game begin!</p></header>
+<main><div class="layout">
+<section class="panel">
+<h2>Live Number Caller</h2><div class="current-wrap"><div id="currentNumber" class="current empty" aria-live="polite">—</div><div><div class="current-label">CURRENT NUMBER</div><div id="calledCount" class="status">0 of 90 numbers called</div><p id="gameStatus" class="muted">Ready when you are. Press “Draw Number”.</p></div></div>
+<div class="controls"><button id="drawBtn" class="primary">🎲 Draw Number</button><button id="autoBtn" class="gold">▶ Auto Draw</button><button id="stopBtn" class="light" disabled>⏸ Stop</button><button id="undoBtn" class="light" disabled>↩ Undo</button><button id="resetBtn" class="danger">↻ New Game</button></div>
+<div class="section-gap"><div class="small-heading"><h2>Number Board (1–90)</h2><span class="muted">Gold = latest</span></div><div id="numberGrid" class="number-grid"></div></div>
+<div class="section-gap"><h2>Call History</h2><div id="history" class="history"><span class="muted">No numbers drawn yet.</span></div></div>
+</section>
+<aside>
+<section class="panel"><h2>My Tambola Ticket</h2><p class="muted">Generate a ticket with 3 rows, 9 columns and 15 numbers. Tap numbers to mark them; called numbers turn green.</p><div class="controls"><button id="ticketBtn" class="primary">🎟 Generate Ticket</button><button id="clearMarksBtn" class="light">Clear Marks</button></div><div id="ticket" class="ticket" aria-label="Your Tambola ticket"></div><p id="ticketStatus" class="muted" aria-live="polite">No ticket generated yet.</p></section>
+<section class="panel section-gap"><h2>Prize Checklist</h2><p class="muted">Track winners on this device.</p><div id="prizes"><label class="field"><span><input type="checkbox" value="Early Five"> Early Five</span></label><label class="field"><span><input type="checkbox" value="Top Line"> Top Line</span></label><label class="field"><span><input type="checkbox" value="Middle Line"> Middle Line</span></label><label class="field"><span><input type="checkbox" value="Bottom Line"> Bottom Line</span></label><label class="field"><span><input type="checkbox" value="Full House"> Full House</span></label></div><button id="clearPrizesBtn" class="light">Reset Prize Checklist</button></section>
+<section class="panel section-gap"><h2>Game Settings</h2><label class="field">Auto-draw interval<select id="intervalSelect"><option value="3">Every 3 seconds</option><option value="5" selected>Every 5 seconds</option><option value="8">Every 8 seconds</option><option value="10">Every 10 seconds</option></select></label><p class="muted">This is a standalone page. Numbers, tickets and prize ticks are not synchronized between devices.</p></section>
+</aside></div></main><footer>Tambola Portal · Runs in your browser · No account required</footer>
+<script>
+(() => {
+  "use strict";
+  const $ = id => document.getElementById(id);
+  let drawOrder = [];
+  let autoTimer = null;
+  let ticketGrid = null; // Always a real 3 x 9 matrix; null means no ticket.
+  let marked = new Set();
 
-  <main>
-    <div class="layout">
-      <section class="panel">
-        <h2>Live Number Caller</h2>
-        <div class="current-wrap">
-          <div id="currentNumber" class="current empty" aria-live="polite">—</div>
-          <div>
-            <div class="current-label">CURRENT NUMBER</div>
-            <div id="calledCount" class="status">0 of 90 numbers called</div>
-            <p id="gameStatus" class="muted">Ready when you are. Press “Draw Number”.</p>
-          </div>
-        </div>
-        <div class="controls">
-          <button id="drawBtn" class="primary">🎲 Draw Number</button>
-          <button id="autoBtn" class="gold">▶ Auto Draw</button>
-          <button id="stopBtn" class="light" disabled>⏸ Stop</button>
-          <button id="undoBtn" class="light" disabled>↩ Undo</button>
-          <button id="resetBtn" class="danger">↻ New Game</button>
-        </div>
+  for (let n = 1; n <= 90; n++) {
+    const cell = document.createElement("div");
+    cell.className = "num";
+    cell.id = "num-" + n;
+    cell.textContent = n;
+    $("numberGrid").appendChild(cell);
+  }
 
-        <div class="section-gap">
-          <div class="small-heading"><h2>Number Board (1–90)</h2><span class="muted">Gold = latest</span></div>
-          <div id="numberGrid" class="number-grid" aria-label="Tambola numbers 1 to 90"></div>
-        </div>
+  function render() {
+    const latest = drawOrder[drawOrder.length - 1];
+    $("currentNumber").textContent = latest ?? "—";
+    $("currentNumber").classList.toggle("empty", latest === undefined);
+    $("calledCount").textContent = `${drawOrder.length} of 90 numbers called`;
+    $("drawBtn").disabled = drawOrder.length >= 90;
+    $("autoBtn").disabled = drawOrder.length >= 90 || autoTimer !== null;
+    $("stopBtn").disabled = autoTimer === null;
+    $("undoBtn").disabled = drawOrder.length === 0;
+    $("gameStatus").textContent = drawOrder.length >= 90 ? "All 90 numbers have been called!" :
+      latest === undefined ? "Ready when you are. Press “Draw Number”." : `Last number drawn: ${latest}`;
+    for (let n = 1; n <= 90; n++) {
+      $("num-" + n).classList.toggle("called", drawOrder.includes(n));
+      $("num-" + n).classList.toggle("latest", n === latest);
+    }
+    const history = $("history");
+    history.replaceChildren();
+    if (!drawOrder.length) {
+      const empty = document.createElement("span"); empty.className = "muted";
+      empty.textContent = "No numbers drawn yet."; history.appendChild(empty);
+    } else {
+      [...drawOrder].reverse().forEach(n => {
+        const chip = document.createElement("span"); chip.className = "chip";
+        chip.textContent = n; history.appendChild(chip);
+      });
+    }
+    renderTicket();
+  }
 
-        <div class="section-gap">
-          <h2>Call History</h2>
-          <div id="history" class="history"><span class="muted">No numbers drawn yet.</span></div>
-        </div>
-      </section>
+  function drawNumber() {
+    if (drawOrder.length >= 90) { stopAuto(); return; }
+    const remaining = [];
+    for (let n = 1; n <= 90; n++) if (!drawOrder.includes(n)) remaining.push(n);
+    drawOrder.push(remaining[Math.floor(Math.random() * remaining.length)]);
+    render();
+    if (drawOrder.length >= 90) stopAuto();
+  }
 
-      <aside>
-        <section class="panel">
-          <h2>My Tambola Ticket</h2>
-          <p class="muted">Generate a ticket for this browser, then tap your numbers to mark them. Marked numbers that have been called turn green.</p>
-          <div class="controls">
-            <button id="ticketBtn" class="primary">🎟 Generate Ticket</button>
-            <button id="clearMarksBtn" class="light">Clear Marks</button>
-          </div>
-          <div id="ticket" class="ticket" aria-label="Your Tambola ticket"></div>
-          <p id="ticketStatus" class="muted">No ticket generated yet.</p>
-        </section>
+  function stopAuto() {
+    if (autoTimer !== null) clearInterval(autoTimer);
+    autoTimer = null;
+    render();
+  }
 
-        <section class="panel section-gap">
-          <h2>Prize Checklist</h2>
-          <p class="muted">Use this checklist to track winners locally on this device.</p>
-          <div id="prizes">
-            <label class="field"><span><input type="checkbox" value="Early Five" /> Early Five</span></label>
-            <label class="field"><span><input type="checkbox" value="Top Line" /> Top Line</span></label>
-            <label class="field"><span><input type="checkbox" value="Middle Line" /> Middle Line</span></label>
-            <label class="field"><span><input type="checkbox" value="Bottom Line" /> Bottom Line</span></label>
-            <label class="field"><span><input type="checkbox" value="Full House" /> Full House</span></label>
-          </div>
-          <button id="clearPrizesBtn" class="light">Reset Prize Checklist</button>
-        </section>
+  // Create a valid 3 x 9 ticket with exactly 5 numbers in each row and 15 overall.
+  // Each column uses its proper Tambola number range and contains at least one number.
+  function generateTicketGrid() {
+    for (let attempt = 0; attempt < 500; attempt++) {
+      const grid = Array.from({length: 3}, () => Array(9).fill(null));
+      const rowCounts = [0, 0, 0];
+      const colCounts = Array(9).fill(0);
+      // First, put one number in every column, with a random row for each column.
+      const colOrder = Array.from({length: 9}, (_, c) => c).sort(() => Math.random() - 0.5);
+      for (const c of colOrder) {
+        const possibleRows = [0, 1, 2].filter(r => rowCounts[r] < 5).sort(() => Math.random() - 0.5);
+        if (!possibleRows.length) break;
+        const r = possibleRows[0];
+        grid[r][c] = true;
+        rowCounts[r]++;
+        colCounts[c]++;
+      }
+      // Add six more cells, never exceeding five numbers per row or three per column.
+      const candidates = [];
+      for (let r = 0; r < 3; r++) for (let c = 0; c < 9; c++) {
+        if (grid[r][c] === null) candidates.push([r, c]);
+      }
+      candidates.sort(() => Math.random() - 0.5);
+      for (const [r, c] of candidates) {
+        if (rowCounts.every(x => x === 5)) break;
+        if (rowCounts[r] < 5 && colCounts[c] < 3 && Math.random() < 0.65) {
+          grid[r][c] = true; rowCounts[r]++; colCounts[c]++;
+        }
+      }
+      // Fill any remaining row slots from eligible empty cells.
+      for (let r = 0; r < 3; r++) {
+        while (rowCounts[r] < 5) {
+          const options = Array.from({length: 9}, (_, c) => c)
+            .filter(c => grid[r][c] === null && colCounts[c] < 3);
+          if (!options.length) break;
+          const c = options[Math.floor(Math.random() * options.length)];
+          grid[r][c] = true; rowCounts[r]++; colCounts[c]++;
+        }
+      }
+      if (!rowCounts.every(x => x === 5)) continue;
 
-        <section class="panel section-gap">
-          <h2>Game Settings</h2>
-          <label class="field">Auto-draw interval
-            <select id="intervalSelect">
-              <option value="3">Every 3 seconds</option>
-              <option value="5" selected>Every 5 seconds</option>
-              <option value="8">Every 8 seconds</option>
-              <option value="10">Every 10 seconds</option>
-            </select>
-          </label>
-          <p class="muted">This is a standalone page. Game numbers, tickets, and prize ticks are not synchronized across different devices.</p>
-        </section>
-      </aside>
-    </div>
-  </main>
-  <footer>Tambola Portal · Runs in your browser · No account required</footer>
+      // Pick ascending numbers from each column's range.
+      const result = Array.from({length: 3}, () => Array(9).fill(null));
+      for (let c = 0; c < 9; c++) {
+        const start = c === 0 ? 1 : c * 10;
+        const end = c === 8 ? 90 : c * 10 + 9;
+        const values = [];
+        for (let n = start; n <= end; n++) values.push(n);
+        values.sort(() => Math.random() - 0.5);
+        const picked = values.slice(0, colCounts[c]).sort((a,b) => a-b);
+        let i = 0;
+        for (let r = 0; r < 3; r++) if (grid[r][c] === true) result[r][c] = picked[i++];
+      }
+      return result;
+    }
+    // Deterministic valid fallback, used only if random attempts fail.
+    const fallback = [
+      [1, null, 21, null, 41, null, 61, null, 81],
+      [null, 11, null, 31, null, 51, null, 71, 90],
+      [9, 19, null, 39, 49, 59, 69, 79, null]
+    ];
+    // Adjust fallback to five values per row while retaining 15 total.
+    return [
+      [1, null, 21, 30, 41, null, 61, null, 81],
+      [null, 11, null, 31, 50, 51, null, 71, 90],
+      [9, 19, 29, null, 49, 59, 69, 79, null]
+    ];
+  }
 
-  <script>
-    (() => {
-      const $ = (id) => document.getElementById(id);
-      let drawOrder = [];
-      let autoTimer = null;
-      let ticketNumbers = [];
-      let ticketGrid = [];
-      let marked = new Set();
+  function generateTicket() {
+    ticketGrid = generateTicketGrid();
+    marked = new Set();
+    const count = ticketGrid.flat().filter(n => n !== null).length;
+    $("ticketStatus").textContent = `Ticket generated: ${count} numbers. Tap a number to mark it.`;
+    renderTicket();
+  }
 
-      const grid = $("numberGrid");
-      for (let n = 1; n <= 90; n++) {
-        const cell = document.createElement("div");
-        cell.className = "num";
-        cell.id = "num-" + n;
+  function renderTicket() {
+    const holder = $("ticket");
+    holder.replaceChildren();
+    if (!ticketGrid) return;
+    ticketGrid.forEach((row, r) => row.forEach((n, c) => {
+      const cell = document.createElement("button");
+      cell.type = "button";
+      cell.className = "ticket-cell";
+      if (n === null) {
+        cell.classList.add("blank"); cell.textContent = ""; cell.disabled = true;
+        cell.setAttribute("aria-label", `Blank cell, row ${r + 1}, column ${c + 1}`);
+      } else {
         cell.textContent = n;
-        grid.appendChild(cell);
+        if (marked.has(n)) cell.classList.add("marked");
+        if (marked.has(n) && drawOrder.includes(n)) cell.classList.add("hit");
+        cell.setAttribute("aria-label", `Number ${n}${marked.has(n) ? ", marked" : ""}`);
+        cell.addEventListener("click", () => {
+          if (marked.has(n)) marked.delete(n); else marked.add(n);
+          const hits = ticketGrid.flat().filter(x => x !== null && marked.has(x) && drawOrder.includes(x)).length;
+          $("ticketStatus").textContent = `${marked.size} marked · ${hits} marked number${hits === 1 ? "" : "s"} have been called.`;
+          renderTicket();
+        });
       }
+      holder.appendChild(cell);
+    }));
+  }
 
-      function render() {
-        const latest = drawOrder[drawOrder.length - 1];
-        $("currentNumber").textContent = latest ?? "—";
-        $("currentNumber").classList.toggle("empty", latest === undefined);
-        $("calledCount").textContent = `${drawOrder.length} of 90 numbers called`;
-        $("drawBtn").disabled = drawOrder.length === 90;
-        $("autoBtn").disabled = drawOrder.length === 90 || autoTimer !== null;
-        $("stopBtn").disabled = autoTimer === null;
-        $("undoBtn").disabled = drawOrder.length === 0;
-        $("gameStatus").textContent = drawOrder.length === 90
-          ? "All 90 numbers have been called!"
-          : latest === undefined ? "Ready when you are. Press “Draw Number”." : `Last number drawn: ${latest}`;
-        for (let n = 1; n <= 90; n++) {
-          const cell = $("num-" + n);
-          cell.classList.toggle("called", drawOrder.includes(n));
-          cell.classList.toggle("latest", n === latest);
-        }
-        $("history").replaceChildren();
-        if (!drawOrder.length) {
-          const empty = document.createElement("span");
-          empty.className = "muted";
-          empty.textContent = "No numbers drawn yet.";
-          $("history").appendChild(empty);
-        } else {
-          [...drawOrder].reverse().forEach(n => {
-            const chip = document.createElement("span");
-            chip.className = "chip";
-            chip.textContent = n;
-            $("history").appendChild(chip);
-          });
-        }
-        renderTicket();
-      }
-
-      function drawNumber() {
-        if (drawOrder.length >= 90) { stopAuto(); render(); return; }
-        const remaining = [];
-        for (let n = 1; n <= 90; n++) if (!drawOrder.includes(n)) remaining.push(n);
-        const next = remaining[Math.floor(Math.random() * remaining.length)];
-        drawOrder.push(next);
-        render();
-        if (drawOrder.length >= 90) stopAuto();
-      }
-
-      function stopAuto() {
-        if (autoTimer !== null) clearInterval(autoTimer);
-        autoTimer = null;
-        render();
-      }
-
-      function generateTicket() {
-        // Create a valid 3 x 9 Tambola ticket: 15 numbers, exactly 5 per row,
-        // and 1–3 numbers in every column.
-        const columnCounts = Array(9).fill(1);
-        let extras = 6; // 9 columns get one number each; add six more.
-        while (extras > 0) {
-          const c = Math.floor(Math.random() * 9);
-          if (columnCounts[c] < 3) {
-            columnCounts[c]++;
-            extras--;
-          }
-        }
-
-        const rows = Array.from({ length: 3 }, () => Array(9).fill(null));
-        const rowCounts = [0, 0, 0];
-
-        // Backtrack to assign each column's numbers to distinct rows while
-        // keeping exactly five numbers in each row.
-        function assignColumn(c) {
-          if (c === 9) return rowCounts.every(count => count === 5);
-
-          const k = columnCounts[c];
-          const rowChoices = [0, 1, 2];
-          // Shuffle row order for varied tickets.
-          for (let i = rowChoices.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [rowChoices[i], rowChoices[j]] = [rowChoices[j], rowChoices[i]];
-          }
-
-          function chooseRows(start, selected) {
-            if (selected.length === k) {
-              if (selected.some(r => rowCounts[r] >= 5)) return false;
-              selected.forEach(r => {
-                rows[r][c] = true;
-                rowCounts[r]++;
-              });
-              if (assignColumn(c + 1)) return true;
-              selected.forEach(r => {
-                rows[r][c] = null;
-                rowCounts[r]--;
-              });
-              return false;
-            }
-            for (let i = start; i < rowChoices.length; i++) {
-              const r = rowChoices[i];
-              if (rowCounts[r] < 5 && chooseRows(i + 1, [...selected, r])) return true;
-            }
-            return false;
-          }
-          return chooseRows(0, []);
-        }
-
-        // A valid arrangement is guaranteed to exist; retry with a fresh
-        // column distribution if a random ordering reaches a dead end.
-        let attempts = 0;
-        while (!assignColumn(0)) {
-          attempts++;
-          rows.forEach(row => row.fill(null));
-          rowCounts.fill(0);
-          if (attempts > 100) {
-            // Deterministic valid fallback: 5 numbers in each row, with
-            // each column used at least once and no more than three times.
-            rows.forEach(row => row.fill(null));
-            rowCounts.fill(0);
-            const fallback = [
-              [0, 1, 2, 3, 4],
-              [2, 3, 4, 5, 6],
-              [4, 5, 6, 7, 8]
-            ];
-            fallback.forEach((cols, r) => cols.forEach(c => {
-              if (rows[r][c] === null) {
-                rows[r][c] = true;
-                rowCounts[r]++;
-              }
-            }));
-            break;
-          }
-        }
-
-        // Select and sort numbers from each column's numeric range.
-        for (let c = 0; c < 9; c++) {
-          const start = c === 0 ? 1 : c * 10;
-          const end = c === 8 ? 90 : c * 10 + 9;
-          const candidates = Array.from({ length: end - start + 1 }, (_, i) => start + i);
-          for (let i = candidates.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
-          }
-          const count = rows.reduce((sum, row) => sum + (row[c] === true ? 1 : 0), 0);
-          const values = candidates.slice(0, count).sort((a, b) => a - b);
-          let idx = 0;
-          for (let r = 0; r < 3; r++) {
-            if (rows[r][c] === true) rows[r][c] = values[idx++];
-          }
-        }
-
-        ticketGrid = rows;
-        ticketNumbers = rows.flat().filter(n => n !== null);
-        marked = new Set();
-        renderTicket();
-        $("ticketStatus").textContent = `Ticket generated: ${ticketNumbers.length} numbers. Tap a number to mark it.`;
-      }
-
-      function renderTicket() {
-        const holder = $("ticket");
-        holder.replaceChildren();
-        if (!ticketGrid.length) return;
-        ticketGrid.forEach(row => row.forEach(n => {
-          const cell = document.createElement("button");
-          cell.type = "button";
-          cell.className = "ticket-cell" + (n === null || n === undefined ? " blank" : "");
-          if (n === null || n === undefined) {
-            cell.disabled = true;
-            cell.textContent = "";
-            cell.setAttribute("aria-hidden", "true");
-          } else {
-            cell.textContent = n;
-            if (marked.has(n)) cell.classList.add("marked");
-            if (marked.has(n) && drawOrder.includes(n)) cell.classList.add("hit");
-            cell.setAttribute("aria-label", `Number ${n}${marked.has(n) ? ", marked" : ""}`);
-            cell.addEventListener("click", () => {
-              if (marked.has(n)) marked.delete(n); else marked.add(n);
-              renderTicket();
-              const hits = ticketNumbers.filter(x => marked.has(x) && drawOrder.includes(x)).length;
-              $("ticketStatus").textContent = `${marked.size} marked · ${hits} marked number${hits === 1 ? "" : "s"} have been called.`;
-            });
-          }
-          holder.appendChild(cell);
-        }));
-      }
-
-      $("drawBtn").addEventListener("click", drawNumber);
-      $("autoBtn").addEventListener("click", () => {
-        if (autoTimer !== null) return;
-        drawNumber();
-        if (drawOrder.length < 90) {
-          autoTimer = setInterval(drawNumber, Number($("intervalSelect").value) * 1000);
-          render();
-        }
-      });
-      $("stopBtn").addEventListener("click", stopAuto);
-      $("undoBtn").addEventListener("click", () => {
-        stopAuto();
-        drawOrder.pop();
-        render();
-      });
-      $("resetBtn").addEventListener("click", () => {
-        if (!confirm("Start a new game? This clears called numbers and stops auto draw.")) return;
-        stopAuto();
-        drawOrder = [];
-        render();
-      });
-      $("ticketBtn").addEventListener("click", generateTicket);
-      $("clearMarksBtn").addEventListener("click", () => {
-        marked.clear();
-        renderTicket();
-        $("ticketStatus").textContent = ticketNumbers.length ? "All ticket marks cleared." : "No ticket generated yet.";
-      });
-      $("clearPrizesBtn").addEventListener("click", () => {
-        document.querySelectorAll("#prizes input[type=checkbox]").forEach(box => box.checked = false);
-      });
+  $("drawBtn").addEventListener("click", drawNumber);
+  $("autoBtn").addEventListener("click", () => {
+    if (autoTimer !== null || drawOrder.length >= 90) return;
+    drawNumber();
+    if (drawOrder.length < 90) {
+      autoTimer = setInterval(drawNumber, Number($("intervalSelect").value) * 1000);
       render();
-    })();
-  </script>
+    }
+  });
+  $("stopBtn").addEventListener("click", stopAuto);
+  $("undoBtn").addEventListener("click", () => { stopAuto(); drawOrder.pop(); render(); });
+  $("resetBtn").addEventListener("click", () => {
+    if (!confirm("Start a new game? This clears called numbers and stops auto draw.")) return;
+    stopAuto(); drawOrder = []; render();
+  });
+  $("ticketBtn").addEventListener("click", generateTicket);
+  $("clearMarksBtn").addEventListener("click", () => {
+    marked.clear(); renderTicket();
+    $("ticketStatus").textContent = ticketGrid ? "All ticket marks cleared." : "No ticket generated yet.";
+  });
+  $("clearPrizesBtn").addEventListener("click", () => {
+    document.querySelectorAll("#prizes input[type=checkbox]").forEach(box => box.checked = false);
+  });
+  render();
+})();
+</script>
 </body>
 </html>
